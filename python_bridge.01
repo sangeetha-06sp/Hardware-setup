@@ -1,0 +1,28 @@
+import serial
+from datetime import datetime
+
+# Connect to Arduino UNO
+arduino = serial.Serial("COM6", 9600, timeout=1)
+
+print("Connected to Arduino UNO!")
+print("Waiting for sensor data...\n")
+
+while True:
+
+    # Read exactly what Arduino sends
+    data = arduino.readline().decode(
+        "utf-8",
+        errors="ignore"
+    ).strip()
+
+    # Only process actual sensor readings
+    if data.startswith("Device:"):
+
+        # Get live date and time
+        now = datetime.now()
+
+        date = now.strftime("%Y-%m-%d")
+        time = now.strftime("%H:%M:%S")
+
+        # Print same format for every reading
+        print(f"{date} {time} | {data}")
