@@ -1,0 +1,57 @@
+#define IR_SENSOR 2
+
+String deviceName = "IR 1";
+String roomNo = "301";
+String floorName = "3rd Floor";
+String block = "Library Block";
+
+void setup() {
+  pinMode(IR_SENSOR, INPUT);
+  Serial.begin(9600);
+
+  Serial.println("================================");
+  Serial.println("     MOTION DETECTION SYSTEM");
+  Serial.println("================================");
+
+  Serial.print("Device Name : ");
+  Serial.println(deviceName);
+
+  Serial.print("Room No     : ");
+  Serial.println(roomNo);
+
+  Serial.print("Floor       : ");
+  Serial.println(floorName);
+
+  Serial.print("Block       : ");
+  Serial.println(block);
+
+  Serial.println("================================");
+}
+
+void loop() {
+
+  int sensorValue = digitalRead(IR_SENSOR);
+
+  Serial.print("Device: ");
+  Serial.print(deviceName);
+
+  Serial.print(" | Room: ");
+  Serial.print(roomNo);
+
+  Serial.print(" | Floor: ");
+  Serial.print(floorName);
+
+  Serial.print(" | Block: ");
+  Serial.print(block);
+
+  Serial.print(" | Status: ");
+
+  if (sensorValue == LOW) {
+    Serial.println("MOTION DETECTED");
+  } 
+  else {
+    Serial.println("NO MOTION");
+  }
+
+  delay(1000);
+}
