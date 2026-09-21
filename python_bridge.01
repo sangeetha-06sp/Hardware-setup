@@ -1,15 +1,33 @@
 import serial
+import requests
 from datetime import datetime
 
-# Connect to Arduino UNO
-arduino = serial.Serial("COM6", 9600, timeout=1)
+# ==============================
+# Arduino Configuration
+# ==============================
+
+arduino = serial.Serial(
+    "COM6",
+    9600,
+    timeout=1
+)
+
+# ==============================
+# Backend API
+# ==============================
+
+BACKEND_URL = "http://192.168.0.167:3000/api/sensor-data"
 
 print("Connected to Arduino UNO!")
 print("Waiting for sensor data...\n")
 
+
+# ==============================
+# Main Loop
+# ==============================
+
 while True:
 
-    # Read exactly what Arduino sends
     data = arduino.readline().decode(
         "utf-8",
         errors="ignore"
@@ -18,11 +36,66 @@ while True:
     # Only process actual sensor readings
     if data.startswith("Device:"):
 
-        # Get live date and time
+        # ------------------------------
+        # Current Date & Time
+        # ------------------------------
+
         now = datetime.now()
 
         date = now.strftime("%Y-%m-%d")
         time = now.strftime("%H:%M:%S")
 
-        # Print same format for every reading
-        print(f"{date} {time} | {data}")
+        # ------------------------------
+        # Detect Motion Status
+        # ------------------------------
+
+        if "Status: MOTION DETECTED" in data:
+            motion_detected = True
+        else:
+            motion_detected = False
+
+        # ------------------------------
+        # Display on Python CMD
+        # ------------------------------
+
+        print("----------------------------------------")
+        print("Date:", date)
+        print("Time:", time)
+        print("Arduino:", data)
+        print("Motion Detected:", motion_detected)
+
+        # ------------------------------
+        # Data to Backend
+        # ------------------------------
+
+        payload = {
+            "device": "IR 1",
+            "roomNo": "301",
+            "floor": "3rd Floor",
+            "block": "Library Block",
+            "motionDetected": motion_detected,
+            "date": date,
+            "time": time
+        }
+
+        # ------------------------------
+        # Send to Backend API
+        # ------------------------------
+
+        try:
+
+            response = requests.post(
+                BACKEND_URL,
+                json=payload,
+                timeout=5
+            )
+
+            print("Backend Status:", response.status_code)
+            print("Backend Response:", response.text)
+
+        except requests.exceptions.RequestException as e:
+
+            print("Backend connection error:", e)
+
+        print("----------------------------------------")
+        print()
